@@ -5,7 +5,7 @@ import {ref} from "vue";
 const list = ref([])
 
 useSignalRStream({
-  onTodoCreated: (value) => list.value.push(value)
+  onDataRecv: (value) => list.value.push(value)
 })
 </script>
 

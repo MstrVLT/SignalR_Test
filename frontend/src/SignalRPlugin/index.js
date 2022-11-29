@@ -33,7 +33,7 @@ export function signalRPlugin(url) {
 }
 
 
-export const useSignalRStream = ({onTodoCreated = () => {},}) => {
+export const useSignalRStream = ({onDataRecv = () => {},}) => {
     const streamError = ref('');
     const value = ref()
 
@@ -58,7 +58,7 @@ export const useSignalRStream = ({onTodoCreated = () => {},}) => {
         })
     })
 
-    watch(value, (nextValue) => { onTodoCreated(nextValue) })
+    watch(value, (nextValue) => { onDataRecv(nextValue) })
 
     // Return the needed information
     return {
