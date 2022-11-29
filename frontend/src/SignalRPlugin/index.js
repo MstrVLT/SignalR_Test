@@ -1,54 +1,67 @@
-import {computed, ref, watch} from "vue";
+import {computed, ref, watch, provide, inject} from "vue";
 import * as signalR from "@microsoft/signalr";
 import { tryOnScopeDispose } from '@vueuse/shared'
 
-const connection = new signalR.HubConnectionBuilder()
-    .withUrl("http://localhost:5267/feed")
-    .configureLogging(signalR.LogLevel.Information)
-    .build();
+export const signalRSymbol = Symbol('NONE');
+
+const createSignalRConnection = config => ({
+    connected: ref(false),
+    connection: new signalR.HubConnectionBuilder()
+        .withUrl(config.url)
+        .configureLogging(signalR.LogLevel.Information)
+        .build()
+});
 
 
-const connected = ref(false)
+export function signalRPlugin(options) {
+    return (app) => {
+        const signalRConnection = createSignalRConnection({url: "http://localhost:5267/feed"})
 
-export const signalRPlugin = (app)=>{
-    connection.on('newMessage', (sender, messageText) => {
-        console.log(`${sender}:${messageText}`);
-    });
-    connection.start()
-        .then(() => {
-            console.log('connected!')
-            connected.value = true
-        })
-        .catch(console.error);
+        app.provide(signalRSymbol, signalRConnection);
+
+        signalRConnection.connection.on('newMessage', (sender, messageText) => {
+            console.log(`${sender}:${messageText}`);
+        });
+
+        signalRConnection.connection.start()
+            .then(() => {
+                console.log('connected!')
+                signalRConnection.connected.value = true
+            })
+            .catch(console.error);
+    };
 }
 
-export const useSignalRStream = ({onTodoCreated = () => {},}) => {
-    const todoCreationError = ref('');
 
+export const useSignalRStream = ({onTodoCreated = () => {},}) => {
+    const streamError = ref('');
     const value = ref()
 
-    watch(connected, (newConnected) => {
-        if (newConnected) {
-            const subscription = connection.stream("Counter", 10, 500)
-                .subscribe({
-                    next: (val) => {value.value = val},
-                    complete: () => {
-                    },
-                    error: (err) => {
-                        todoCreationError.value = err;
-                    },
-                })
+    // noinspection JSCheckFunctionSignatures
+    const signalR = inject(signalRSymbol);
 
-            tryOnScopeDispose(() => {
-                subscription.dispose()
+    watch(signalR.connected, (newConnected) => {
+        if (!newConnected) return
+
+        const subscription = signalR.connection.stream("Counter", 10, 500)
+            .subscribe({
+                next: (val) => {value.value = val},
+                complete: () => {
+                },
+                error: (err) => {
+                    streamError.value = err;
+                },
             })
-        }
+
+        tryOnScopeDispose(() => {
+            subscription.dispose()
+        })
     })
 
     watch(value, (nextValue) => { onTodoCreated(nextValue) })
 
     // Return the needed information
     return {
-        todoCreationError,
+        streamError,
     }
 }
