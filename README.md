@@ -1,5 +1,5 @@
 # SignalR_Test
-# WIP
+WIP
 
-example of using signalr and vuejs3
+example of using streaming signalr and vuejs3
 
