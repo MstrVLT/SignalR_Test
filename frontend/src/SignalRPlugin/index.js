@@ -13,9 +13,9 @@ const createSignalRConnection = config => ({
 });
 
 
-export function signalRPlugin(options) {
+export function signalRPlugin(url) {
     return (app) => {
-        const signalRConnection = createSignalRConnection({url: "http://localhost:5267/feed"})
+        const signalRConnection = createSignalRConnection({url})
 
         app.provide(signalRSymbol, signalRConnection);
 
