@@ -1,12 +1,17 @@
 <script setup>
-// import {useSignalRStream} from './SignalRPlugin'
+import {useSignalRInvoke, useSignalROn} from './plugins/SignalRPlugin/connection.js'
 import {ref} from "vue";
 
 const list = ref([])
 
-// useSignalRStream({
-//   onDataRecv: (value) => list.value.push(value)
-// })
+const { execute } = useSignalRInvoke('SendMessage')
+
+const testInvoke = () => execute('ger')
+
+useSignalROn('newMessage', (msg, param2) => {
+  list.value.push(`${msg}, ${param2}`)
+});
+
 </script>
 
 <template>
@@ -17,6 +22,15 @@ const list = ref([])
           <p class="text-lg text-black dark:text-white font-semibold mb-2">
             {{ JSON.stringify(list) }}
           </p>
+          <div class="relative rounded-xl overflow-auto p-8">
+            <div class="flex items-center justify-center">
+
+              <button type="button" class="inline-flex items-center px-4 py-2 font-semibold leading-6 text-sm shadow rounded-md text-white bg-indigo-500"  @click="testInvoke()">
+                testInvoke
+              </button>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>

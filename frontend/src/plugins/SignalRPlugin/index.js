@@ -36,7 +36,7 @@ export default {
                     setTimeout(start, 5000);
                 })
         }
-
+        // connection.invoke
         connection.onclose(() => {
           connectionStarted.value = false
             start()

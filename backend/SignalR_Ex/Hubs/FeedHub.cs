@@ -8,7 +8,7 @@ public class FeedHub : Hub
     public override async Task OnConnectedAsync()
     {
         await Clients.All.SendAsync("newMessage", 
-            $"{Context.ConnectionId} joined.");
+            $"{Context.ConnectionId} joined.", "second param");
         await base.OnConnectedAsync();
     }
     
