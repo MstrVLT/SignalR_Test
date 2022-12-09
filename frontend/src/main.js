@@ -1,10 +1,11 @@
 import { createApp } from 'vue'
 import App from './App.vue'
-import { signalRPlugin } from "./SignalRPlugin";
+import SignalRPlugin from "./plugins/SignalRPlugin";
 import 'virtual:windi.css'
 import './style.css'
 
-const signalr = signalRPlugin("http://localhost:5267/feed")
 const app = createApp(App);
-app.use(signalr)
+app.use(SignalRPlugin, {
+    url: 'http://localhost:5267/feed'
+  })
 app.mount("#app");

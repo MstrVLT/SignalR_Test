@@ -1,12 +1,12 @@
 <script setup>
-import {useSignalRStream} from './SignalRPlugin'
+// import {useSignalRStream} from './SignalRPlugin'
 import {ref} from "vue";
 
 const list = ref([])
 
-useSignalRStream({
-  onDataRecv: (value) => list.value.push(value)
-})
+// useSignalRStream({
+//   onDataRecv: (value) => list.value.push(value)
+// })
 </script>
 
 <template>
