@@ -21,12 +21,10 @@ export const useSignalRInvoke = (methodName, ...args) => {
   // noinspection JSCheckFunctionSignatures
   const signalrConnection = inject(signalRSymbol);
 
-  if (signalrConnection === undefined) return Promise.reject()
   const { connection, connectionStarted } = signalrConnection;
 
-  if (!connectionStarted) return Promise.reject()
-
   const execute = (...args) => {
+    if (!connectionStarted) return Promise.reject()
     return connection.invoke(methodName, ...args)
   }
 

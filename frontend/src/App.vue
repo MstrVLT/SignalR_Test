@@ -7,6 +7,8 @@ const list = ref([])
 const { execute } = useSignalRInvoke('SendMessage')
 
 const testInvoke = () => execute('ger')
+    .then(() => console.log('ok'))
+    .catch(() => console.log('not ok'))
 
 useSignalROn('newMessage', (msg, param2) => {
   list.value.push(`${msg}, ${param2}`)
