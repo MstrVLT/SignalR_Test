@@ -11,7 +11,6 @@ const createSignalRConnection = (config) => ({
   connectionStarted: ref(false),
   connection: new HubConnectionBuilder()
     .withUrl(config.url, {
-      skipNegotiation: true,
       transport: HttpTransportType.WebSockets,
     })
     .configureLogging(LogLevel.Information)
