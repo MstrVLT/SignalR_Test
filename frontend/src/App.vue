@@ -4,11 +4,11 @@ import {ref} from "vue";
 
 const list = ref([])
 
-const { execute } = useSignalRInvoke('SendMessage')
-
-const testInvoke = () => execute('ger')
-    .then(() => console.log('ok'))
-    .catch(() => console.log('not ok'))
+const {execute: testInvoke} = useSignalRInvoke('SendMessage', {
+  onResolve: (data) => {
+    console.log('onResolve', data)
+  }
+})
 
 useSignalROn('newMessage', (msg, param2) => {
   list.value.push(`${msg}, ${param2}`)
@@ -27,7 +27,9 @@ useSignalROn('newMessage', (msg, param2) => {
           <div class="relative rounded-xl overflow-auto p-8">
             <div class="flex items-center justify-center">
 
-              <button type="button" class="inline-flex items-center px-4 py-2 font-semibold leading-6 text-sm shadow rounded-md text-white bg-indigo-500"  @click="testInvoke()">
+              <button
+                  class="inline-flex items-center px-4 py-2 font-semibold leading-6 text-sm shadow rounded-md text-white bg-indigo-500"
+                  type="button" @click="testInvoke('ger', 'der')">
                 testInvoke
               </button>
             </div>
@@ -42,8 +44,8 @@ useSignalROn('newMessage', (msg, param2) => {
 <style scoped>
 .box {
   @apply
-    py-8 px-8 inline-flex mx-auto
-    bg-white dark:bg-gray-400 dark:bg-opacity-10
-    rounded-xl shadow-md space-y-2;
+  py-8 px-8 inline-flex mx-auto
+  bg-white dark:bg-gray-400 dark:bg-opacity-10
+  rounded-xl shadow-md space-y-2;
 }
 </style>

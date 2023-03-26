@@ -12,9 +12,10 @@ public class FeedHub : Hub
         await base.OnConnectedAsync();
     }
     
-    public async Task SendMessage(string message)
+    public async Task<string> SendMessage(string message, string message2)
     {
-        await Clients.All.SendAsync("newMessage", "anonymous", message);
+        await Clients.All.SendAsync("newMessage", "anonymous", message + message2);
+        return message + message2;
     }
     
     public async IAsyncEnumerable<int> Counter(

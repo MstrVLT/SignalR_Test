@@ -17,16 +17,26 @@ export const useSignalROn = (methodName, newMethod = () => {}) => {
   });
 };
 
-export const useSignalRInvoke = (methodName, ...args) => {
+export const useSignalRInvoke = (methodName, {
+  onResolve = (data) => {}
+}) => {
   // noinspection JSCheckFunctionSignatures
   const signalrConnection = inject(signalRSymbol);
 
   const { connection, connectionStarted } = signalrConnection;
 
-  const execute = (...args) => {
-    if (!connectionStarted) return Promise.reject()
-    return connection.invoke(methodName, ...args)
-  }
+  // const execute = (d, cb) => {
+  //   if (!connectionStarted) return Promise.reject()
+  //   return connection.invoke(methodName, ...args)
+  // }
+  const promisify = func => (...args) =>
+      new Promise((resolve, reject) =>
+          func(...args)
+      );
+
+  const execute = promisify((...args) =>
+      connection.invoke(methodName, ...args)
+          .then(onResolve))
 
   return { execute }
 };
