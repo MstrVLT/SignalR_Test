@@ -4,10 +4,14 @@ import {ref} from "vue";
 
 const list = ref([])
 
-const {execute: testInvoke} = useSignalRInvoke('SendMessage', {
-  onResolve: (data) => {
-    console.log('onResolve', data)
-  }
+const {execute, onResult, onError} = useSignalRInvoke('SendMessage')
+
+onResult((result) => {
+  console.log(result)
+})
+
+onError((error) => {
+  console.error(error)
 })
 
 useSignalROn('newMessage', (msg, param2) => {
@@ -29,7 +33,7 @@ useSignalROn('newMessage', (msg, param2) => {
 
               <button
                   class="inline-flex items-center px-4 py-2 font-semibold leading-6 text-sm shadow rounded-md text-white bg-indigo-500"
-                  type="button" @click="testInvoke('ger', 'der')">
+                  type="button" @click="execute('1', '2')">
                 testInvoke
               </button>
             </div>

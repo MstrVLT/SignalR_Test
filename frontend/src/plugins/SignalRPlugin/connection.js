@@ -1,6 +1,7 @@
-import { computed, ref, watch, provide, inject } from "vue";
+import { inject } from "vue";
 import { signalRSymbol } from "./index.js";
 import {tryOnScopeDispose} from "@vueuse/shared";
+import { createEventHook } from '@vueuse/core'
 
 export const useSignalROn = (methodName, newMethod = () => {}) => {
   // noinspection JSCheckFunctionSignatures
@@ -17,26 +18,20 @@ export const useSignalROn = (methodName, newMethod = () => {}) => {
   });
 };
 
-export const useSignalRInvoke = (methodName, {
-  onResolve = (data) => {}
-}) => {
+export const useSignalRInvoke = (methodName) => {
+  const invokeResult = createEventHook()
+  const invokeError = createEventHook()
+
   // noinspection JSCheckFunctionSignatures
   const signalrConnection = inject(signalRSymbol);
 
-  const { connection, connectionStarted } = signalrConnection;
+  const { connection } = signalrConnection;
 
-  // const execute = (d, cb) => {
-  //   if (!connectionStarted) return Promise.reject()
-  //   return connection.invoke(methodName, ...args)
-  // }
-  const promisify = func => (...args) =>
-      new Promise((resolve, reject) =>
-          func(...args)
-      );
+  const execute = (...args) => {
+    connection.invoke(methodName, ...args)
+        .then(result => invokeResult.trigger(result))
+        .catch(error => invokeError.trigger(error.message))
+  }
 
-  const execute = promisify((...args) =>
-      connection.invoke(methodName, ...args)
-          .then(onResolve))
-
-  return { execute }
+  return { execute, onResult: invokeResult.on, onError: invokeError.on, }
 };
