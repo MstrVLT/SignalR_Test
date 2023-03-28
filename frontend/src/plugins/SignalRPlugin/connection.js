@@ -1,4 +1,4 @@
-import { inject } from "vue";
+import {inject, reactive, shallowReactive, shallowRef} from "vue";
 import { signalRSymbol } from "./index.js";
 import {tryOnScopeDispose} from "@vueuse/shared";
 import { createEventHook } from '@vueuse/core'
@@ -19,19 +19,27 @@ export const useSignalROn = (methodName, newMethod = () => {}) => {
 };
 
 export const useSignalRInvoke = (methodName) => {
-  const invokeResult = createEventHook()
-  const invokeError = createEventHook()
-
   // noinspection JSCheckFunctionSignatures
   const signalrConnection = inject(signalRSymbol);
-
   const { connection } = signalrConnection;
 
+  const invokeResult = createEventHook()
+  const invokeError = createEventHook()
   const execute = (...args) => {
     connection.invoke(methodName, ...args)
         .then(result => invokeResult.trigger(result))
         .catch(error => invokeError.trigger(error.message))
   }
 
-  return { execute, onResult: invokeResult.on, onError: invokeError.on, }
+  const data = shallowRef(null)
+  invokeResult.on(d => {
+    data.value = d
+  })
+
+  const error = shallowRef(null)
+  invokeError.on(d => {
+    error.value = d
+  })
+
+  return { execute, data, error, onInvokeResult: invokeResult.on, onInvokeError: invokeError.on, }
 };

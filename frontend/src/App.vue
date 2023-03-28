@@ -1,22 +1,30 @@
 <script setup>
 import {useSignalRInvoke, useSignalROn} from './plugins/SignalRPlugin/connection.js'
-import {ref} from "vue";
+import {ref, watch} from "vue";
 
 const list = ref([])
-
-const {execute, onResult, onError} = useSignalRInvoke('SendMessage')
-
-onResult((result) => {
-  console.log(result)
-})
-
-onError((error) => {
-  console.error(error)
-})
 
 useSignalROn('newMessage', (msg, param2) => {
   list.value.push(`${msg}, ${param2}`)
 });
+
+const { execute, error, data, onInvokeResult } = useSignalRInvoke('SendMessage')
+
+// Method
+const testInvoke = () => {
+  let f = (Math.random() + 1).toString(36).substring(7);
+  let s = (Math.random() + 1).toString(36).substring(7);
+  console.log(f, s, '=>')
+  execute(f, s)
+}
+
+// Ref
+watch(data, d => console.log('=>', d))
+
+// Event
+onInvokeResult((result) => {
+  console.log('=>', result)
+})
 
 </script>
 
@@ -33,7 +41,7 @@ useSignalROn('newMessage', (msg, param2) => {
 
               <button
                   class="inline-flex items-center px-4 py-2 font-semibold leading-6 text-sm shadow rounded-md text-white bg-indigo-500"
-                  type="button" @click="execute('1', '2')">
+                  type="button" @click="testInvoke">
                 testInvoke
               </button>
             </div>
