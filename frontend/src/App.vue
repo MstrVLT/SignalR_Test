@@ -5,29 +5,30 @@ import {ref, watch} from "vue";
 const list = ref([])
 
 const { execute: executeVariadic, data} = useSignalRInvoke('SendMessageVariadic')
+
 useSignalROn('newMessageVariadic', (msg, param2) => {
   list.value.push(`${msg}, ${param2}`)
 });
 const testInvokeVariadic = () => {
   let f = (Math.random() + 1).toString(36).substring(7);
   let s = (Math.random() + 1).toString(36).substring(7);
-  console.log(f, s, '=> testInvokeVariadic')
+
   executeVariadic(f,s)
 }
 
 const { execute: executeObject, onInvokeResult } = useSignalRInvoke('SendMessageObject')
+
 useSignalROn('newMessageObject', (msg, param2) => {
   list.value.push(`${msg}, ${param2}`)
 });
 const testInvokeObject = () => {
   let f = (Math.random() + 1).toString(36).substring(7);
   let s = (Math.random() + 1).toString(36).substring(7);
+
   executeObject({
     firstMessage: f,
     secondMessage: s
   })
-
-  console.log(f, s, '=> testInvokeObject')
 }
 
 // Ref
