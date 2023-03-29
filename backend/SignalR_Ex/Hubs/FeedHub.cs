@@ -4,7 +4,12 @@ using Microsoft.AspNetCore.SignalR;
 namespace SignalR_Ex.Hubs;
 
 public class FeedHub : Hub
-{            
+{
+    public record MessageValue (
+        string firstMessage,
+        string secondMessage
+    );
+
     public override async Task OnConnectedAsync()
     {
         await Clients.All.SendAsync("newMessage", 
@@ -12,10 +17,18 @@ public class FeedHub : Hub
         await base.OnConnectedAsync();
     }
     
-    public async Task<string> SendMessage(string message, string message2)
+    public async Task<string> SendMessageVariadic(string message, string message2)
     {
-        await Clients.All.SendAsync("newMessage", "anonymous", message + message2);
-        return message + message2;
+        var newMsg = message + message2;
+        await Clients.All.SendAsync("newMessageVariadic", "anonymous", newMsg);
+        return newMsg;
+    }
+
+    public async Task<string> SendMessageObject(MessageValue messageValue)
+    {
+        var newMsg = messageValue.firstMessage + messageValue.secondMessage;
+        await Clients.All.SendAsync("newMessageObject", "anonymous", newMsg);
+        return newMsg;
     }
     
     public async IAsyncEnumerable<int> Counter(

@@ -4,18 +4,30 @@ import {ref, watch} from "vue";
 
 const list = ref([])
 
-useSignalROn('newMessage', (msg, param2) => {
+const { execute: executeVariadic, data} = useSignalRInvoke('SendMessageVariadic')
+useSignalROn('newMessageVariadic', (msg, param2) => {
   list.value.push(`${msg}, ${param2}`)
 });
-
-const { execute, error, data, onInvokeResult } = useSignalRInvoke('SendMessage')
-
-// Method
-const testInvoke = () => {
+const testInvokeVariadic = () => {
   let f = (Math.random() + 1).toString(36).substring(7);
   let s = (Math.random() + 1).toString(36).substring(7);
-  console.log(f, s, '=>')
-  execute(f, s)
+  console.log(f, s, '=> testInvokeVariadic')
+  executeVariadic(f,s)
+}
+
+const { execute: executeObject, onInvokeResult } = useSignalRInvoke('SendMessageObject')
+useSignalROn('newMessageObject', (msg, param2) => {
+  list.value.push(`${msg}, ${param2}`)
+});
+const testInvokeObject = () => {
+  let f = (Math.random() + 1).toString(36).substring(7);
+  let s = (Math.random() + 1).toString(36).substring(7);
+  executeObject({
+    firstMessage: f,
+    secondMessage: s
+  })
+
+  console.log(f, s, '=> testInvokeObject')
 }
 
 // Ref
@@ -38,11 +50,15 @@ onInvokeResult((result) => {
           </p>
           <div class="relative rounded-xl overflow-auto p-8">
             <div class="flex items-center justify-center">
-
               <button
                   class="inline-flex items-center px-4 py-2 font-semibold leading-6 text-sm shadow rounded-md text-white bg-indigo-500"
-                  type="button" @click="testInvoke">
-                testInvoke
+                  type="button" @click="testInvokeObject">
+                testInvokeObject
+              </button>
+              <button
+                  class="inline-flex items-center px-4 py-2 font-semibold leading-6 text-sm shadow rounded-md text-white bg-indigo-500"
+                  type="button" @click="testInvokeVariadic">
+                testInvokeVariadic
               </button>
             </div>
           </div>
