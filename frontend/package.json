@@ -9,10 +9,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@microsoft/signalr": "^7.0.0",
-    "@vueuse/core": "^9.6.0",
-    "@vueuse/shared": "^9.6.0",
-    "vue": "^3.2.41"
+    "@microsoft/signalr": "^8.0.0",
+    "@vueuse/core": "^10.11.0",
+    "@vueuse/shared": "^10.11.0",
+    "vue": "^3.4.29"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^3.2.0",

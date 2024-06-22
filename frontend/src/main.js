@@ -6,6 +6,7 @@ import './style.css'
 
 const app = createApp(App);
 app.use(SignalRPlugin, {
+    useWebLock: true,
     url: 'http://localhost:5267/feed'
   })
 app.mount("#app");
