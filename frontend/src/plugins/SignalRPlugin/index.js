@@ -58,6 +58,7 @@ export default {
         }
         // connection.invoke
         connection.onclose(() => {
+            lockResolver?.();
             connectionStarted.value = false
             start()
         })
