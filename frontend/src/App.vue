@@ -4,11 +4,16 @@ import {ref, watch} from "vue";
 
 const list = ref([])
 
-const { execute: executeVariadic, data} = useSignalRInvoke('SendMessageVariadic')
-
 useSignalROn('newMessageVariadic', (msg, param2) => {
   list.value.push(`${msg}, ${param2}`)
 });
+
+useSignalROn('newMessageObject', (msg, param2) => {
+  list.value.push(`${msg}, ${param2}`)
+});
+
+const { execute: executeVariadic, data} = useSignalRInvoke('SendMessageVariadic')
+
 const testInvokeVariadic = () => {
   let f = (Math.random() + 1).toString(36).substring(7);
   let s = (Math.random() + 1).toString(36).substring(7);
@@ -16,11 +21,11 @@ const testInvokeVariadic = () => {
   executeVariadic(f,s)
 }
 
+// Ref
+watch(data, d => console.log('=>', d))
+
 const { execute: executeObject, onInvokeResult } = useSignalRInvoke('SendMessageObject')
 
-useSignalROn('newMessageObject', (msg, param2) => {
-  list.value.push(`${msg}, ${param2}`)
-});
 const testInvokeObject = () => {
   let f = (Math.random() + 1).toString(36).substring(7);
   let s = (Math.random() + 1).toString(36).substring(7);
@@ -30,9 +35,6 @@ const testInvokeObject = () => {
     secondMessage: s
   })
 }
-
-// Ref
-watch(data, d => console.log('=>', d))
 
 // Event
 onInvokeResult((result) => {
