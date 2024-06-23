@@ -1,18 +1,20 @@
 <script setup>
-import {useSignalRInvoke, useSignalROn} from './plugins/SignalRPlugin/connection.js'
 import {ref, watch} from "vue";
+import {useSignalR, useSignalRInvoke, useSignalROn} from "./signalr.js";
 
 const list = ref([])
 
-useSignalROn('newMessageVariadic', (msg, param2) => {
+const { start, connection, status } = useSignalR('http://localhost:5267/feed-first', { immediate: false })
+
+useSignalROn(connection, 'newMessageVariadic', ([msg, param2]) => {
   list.value.push(`${msg}, ${param2}`)
 });
 
-useSignalROn('newMessageObject', (msg, param2) => {
-  list.value.push(`${msg}, ${param2}`)
+useSignalROn(connection, 'newMessage', ([msg, param2]) => {
+  console.log(' =>', msg, param2)
 });
 
-const { execute: executeVariadic, data} = useSignalRInvoke('SendMessageVariadic')
+const { execute: executeVariadic, data} = useSignalRInvoke(connection, 'SendMessageVariadic')
 
 const testInvokeVariadic = () => {
   let f = (Math.random() + 1).toString(36).substring(7);
@@ -22,28 +24,16 @@ const testInvokeVariadic = () => {
 }
 
 // Ref
-watch(data, d => console.log('=>', d))
-
-const { execute: executeObject, onInvokeResult } = useSignalRInvoke('SendMessageObject')
-
-const testInvokeObject = () => {
-  let f = (Math.random() + 1).toString(36).substring(7);
-  let s = (Math.random() + 1).toString(36).substring(7);
-
-  executeObject({
-    firstMessage: f,
-    secondMessage: s
-  })
-}
-
-// Event
-onInvokeResult((result) => {
-  console.log('=>', result)
-})
-
+watch(data, d => console.log(' =>', d))
 </script>
 
 <template>
+  <button
+      class="inline-flex items-center px-4 py-2 font-semibold leading-6 text-sm shadow rounded-md text-white bg-indigo-500"
+      type="button" @click="start">
+    connect
+  </button>
+  <div class="text-white">{{status}}</div>
   <div class="flex">
     <div class="box">
       <div class="text-center space-y-2">

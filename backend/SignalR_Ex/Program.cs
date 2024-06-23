@@ -35,7 +35,8 @@ app.UseHttpsRedirection();
 
 app.UseAuthorization();
 app.UseCors("FeedClientApp");
-app.MapHub<FeedHub>("/feed");
+app.MapHub<FeedHub>("/feed-first");
+app.MapHub<FeedHub>("/feed-second");
 
 app.MapControllers();
 
