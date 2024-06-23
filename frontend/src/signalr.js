@@ -16,10 +16,45 @@ const createSignalRConnection = (url, options) => new HubConnectionBuilder()
         .configureLogging(LogLevel.Information)
         .build()
 
+// https://github.com/vuejs/apollo/blob/v4/packages/vue-apollo-composable/src/util/useEventHook.ts
+function useEventHook() {
+    const fns = []
+
+    function on(fn) {
+        fns.push(fn)
+        return {
+            off: () => off(fn)
+        }
+    }
+
+    function off(fn) {
+        const index = fns.indexOf(fn)
+        if (index !== -1) {
+            fns.splice(index, 1)
+        }
+    }
+
+    function trigger(...params) {
+        for (const fn of fns) {
+            fn(...params)
+        }
+    }
+
+    function getCount() {
+        return fns.length
+    }
+
+    return {
+        on,
+        off,
+        trigger,
+        getCount
+    }
+}
+
 export { HubConnectionState }
 
 export function useSignalR(url, options =  {}) {
-
     const {
         useWebLock = true,
         immediate = true,
@@ -83,9 +118,12 @@ export function useSignalR(url, options =  {}) {
 }
 
 export const useSignalROn = (connection, methodName, methodHandler = () => {}) => {
+    const resultEvent = useEventHook()
+
     if (toValue(connection)) {
-        console.log('on')
+        console.log('on', connection.connectionId)
         toValue(connection).on(methodName, ( ...arg ) => {
+            resultEvent.trigger([...arg])
             methodHandler([...arg])
         })
     }
@@ -93,8 +131,12 @@ export const useSignalROn = (connection, methodName, methodHandler = () => {}) =
     if (getCurrentScope()) {
         onScopeDispose(() => {
             toValue(connection).off(methodName)
-            console.log('off')
+            console.log('off', connection.connectionId)
         })
+    }
+
+    return {
+        onResult: resultEvent.on
     }
 };
 
@@ -102,14 +144,23 @@ export function useSignalRInvoke(connection, methodName) {
     const data = ref(null)
     const error = ref(null)
 
+    const resultEvent = useEventHook()
+    const errorEvent = useEventHook()
+
     const execute = (...args) => {
         error.value = null
         if (toValue(connection)) {
             toValue(connection).invoke(toValue(methodName), ...args)
-                .then((res) => (data.value = res))
-                .catch((err) => (error.value = err))
+                .then((res) => {
+                    resultEvent.trigger(res)
+                    data.value = res
+                })
+                .catch((err) => {
+                    errorEvent.trigger(err)
+                    error.value = err
+                })
         }
     }
 
-    return { execute, data, error }
+    return { execute, data, error, resultEvent: resultEvent.on, errorEvent: errorEvent.on }
 }

@@ -14,29 +14,27 @@ useSignalROn(connection, 'newMessageVariadic', ([msg, param2]) => {
   list.value.push(`${msg}, ${param2}`)
 });
 
-const { execute: executeVariadic, data} = useSignalRInvoke(connection, 'SendMessageVariadic')
+const { execute: executeVariadic, data, resultEvent } = useSignalRInvoke(connection, 'SendMessageVariadic')
 
 // Ref
-watch(data, d => console.log(' =>', d))
+watch(data, d => console.log('=>', d))
 
 // test method
-
 const testInvokeVariadic = () => {
   let f = (Math.random() + 1).toString(36).substring(7);
   let s = (Math.random() + 1).toString(36).substring(7);
-
   executeVariadic(f,s)
 }
+
+resultEvent(([msg, param2]) => console.log('newMessageVariadic from first feed =>', msg, param2))
 
 // second feed
 
 const { connection: connectionSecond } = useSignalR('http://localhost:5267/feed-second', { immediate: true })
 
-useSignalROn(connectionSecond, 'newMessage', ([msg, param2]) => {
-  console.log('newMessage from second feed =>', msg, param2)
-});
+const { onResult } = useSignalROn(connectionSecond, 'newMessage');
 
-useSignalROn(connectionSecond, 'newMessageVariadic', ([msg, param2]) => {
+onResult(([msg, param2]) => {
   console.log('newMessageVariadic from second feed =>', msg, param2)
 });
 
