@@ -4,17 +4,22 @@ import {useSignalR, useSignalRInvoke, useSignalROn} from "./signalr.js";
 
 const list = ref([])
 
+// first feed
+
 const { start, connection, status } = useSignalR('http://localhost:5267/feed-first', { immediate: false })
+
+// warn in console No client method with the name 'newmessage' found. 
 
 useSignalROn(connection, 'newMessageVariadic', ([msg, param2]) => {
   list.value.push(`${msg}, ${param2}`)
 });
 
-useSignalROn(connection, 'newMessage', ([msg, param2]) => {
-  console.log(' =>', msg, param2)
-});
-
 const { execute: executeVariadic, data} = useSignalRInvoke(connection, 'SendMessageVariadic')
+
+// Ref
+watch(data, d => console.log(' =>', d))
+
+// test method
 
 const testInvokeVariadic = () => {
   let f = (Math.random() + 1).toString(36).substring(7);
@@ -23,8 +28,18 @@ const testInvokeVariadic = () => {
   executeVariadic(f,s)
 }
 
-// Ref
-watch(data, d => console.log(' =>', d))
+// second feed
+
+const { connection: connectionSecond } = useSignalR('http://localhost:5267/feed-second', { immediate: true })
+
+useSignalROn(connectionSecond, 'newMessage', ([msg, param2]) => {
+  console.log('newMessage from second feed =>', msg, param2)
+});
+
+useSignalROn(connectionSecond, 'newMessageVariadic', ([msg, param2]) => {
+  console.log('newMessageVariadic from second feed =>', msg, param2)
+});
+
 </script>
 
 <template>
